@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+<div class="card" style="max-width:420px;margin:60px auto;">
+  <h1 style="text-align:center;">EDL Manager</h1>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <p style="color:var(--danger);text-align:center;"><%= error %></p>
+  <% } %>
+
+  <% if (authMode === 'local') { %>
+    <p class="muted" style="text-align:center;">Local test login.</p>
+    <form method="post" action="/login">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <p><label>Username<br><input name="username" required autofocus style="width:100%"></label></p>
+      <p><label>Password<br><input name="password" type="password" required style="width:100%"></label></p>
+      <p style="text-align:center;"><button class="btn primary" type="submit">Sign in</button></p>
+    </form>
+  <% } else { %>
+    <p class="muted" style="text-align:center;">Sign in to manage External Dynamic Lists.</p>
+    <p style="text-align:center;"><a class="btn primary" href="/login/start">Sign in with SSO</a></p>
+  <% } %>
+</div>
+<%- include('partials/footer') %>

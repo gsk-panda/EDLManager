@@ -1,0 +1,10 @@
+  </main>
+  <script>
+    function copyText(t, el) {
+      navigator.clipboard.writeText(t).then(function () {
+        if (el) { var o = el.textContent; el.textContent = 'copied'; setTimeout(function(){ el.textContent = o; }, 1200); }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "edl-manager",
+  "version": "0.1.0",
+  "description": "OIDC-authenticated manager for Palo Alto External Dynamic Lists, serving public .txt feeds.",
+  "type": "commonjs",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js",
+    "sweep": "node scripts/expire-sweeper.js",
+    "import": "node scripts/import.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "connect-pg-simple": "^9.0.1",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "ipaddr.js": "^2.4.0",
+    "openid-client": "^5.6.5",
+    "pg": "^8.12.0"
+  }
+}

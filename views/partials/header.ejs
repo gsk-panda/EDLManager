@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EDL Manager</title>
+  <style>
+    :root { --fg:#1a1d21; --muted:#6b7280; --line:#e5e7eb; --bg:#f7f8fa;
+            --accent:#2563eb; --danger:#dc2626; --ok:#059669; --card:#fff; }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+           color:var(--fg); background:var(--bg); }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    header.top { display:flex; align-items:center; justify-content:space-between;
+                 padding:12px 24px; background:var(--card); border-bottom:1px solid var(--line); }
+    header.top .brand { font-weight:700; letter-spacing:.2px; }
+    header.top .right { display:flex; align-items:center; gap:14px; color:var(--muted); font-size:13px; }
+    main { max-width:1040px; margin:0 auto; padding:24px; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
+            padding:18px 20px; margin-bottom:18px; }
+    h1 { font-size:22px; margin:0 0 4px; }
+    h2 { font-size:16px; margin:0 0 12px; }
+    table { width:100%; border-collapse:collapse; font-size:14px; }
+    th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top; }
+    th { color:var(--muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    code,.mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:13px; }
+    input,select,textarea { font:inherit; padding:7px 9px; border:1px solid var(--line);
+                            border-radius:7px; background:#fff; }
+    textarea { width:100%; }
+    .btn { display:inline-block; padding:7px 13px; border-radius:7px; border:1px solid var(--line);
+           background:#fff; cursor:pointer; font-size:14px; }
+    .btn.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+    .btn.danger { color:var(--danger); border-color:#f1c4c4; }
+    .btn.sm { padding:3px 8px; font-size:12px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:end; }
+    .pill { font-size:11px; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#3730a3; }
+    .muted { color:var(--muted); }
+    .disabled-row td { opacity:.45; }
+    .expired { color:var(--danger); }
+    form.inline { display:inline; margin:0; }
+    label small { display:block; color:var(--muted); font-size:12px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><a href="/">EDL&nbsp;Manager</a></div>
+    <div class="right">
+      <% if (typeof user !== 'undefined' && user) { %>
+        <span><%= user.name || user.email %> &middot; <span class="pill"><%= user.role %></span></span>
+        <form class="inline" method="post" action="/logout">
+          <% if (typeof csrf !== 'undefined') { %><input type="hidden" name="_csrf" value="<%= csrf %>"><% } %>
+          <button class="btn sm" type="submit">Sign out</button>
+        </form>
+      <% } %>
+    </div>
+  </header>
+  <main>

@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+
+<div class="card">
+  <h1>External Dynamic Lists</h1>
+  <p class="muted">Each list is served at a public <code>.txt</code> URL your firewalls can fetch.</p>
+
+  <% if (edls.length === 0) { %>
+    <p class="muted">No EDLs yet. Create one below.</p>
+  <% } else { %>
+    <table>
+      <thead><tr><th>Name</th><th>Type</th><th>Active</th><th>Public URL</th><th>Last fetch</th><th></th></tr></thead>
+      <tbody>
+      <% edls.forEach(function (e) { %>
+        <tr<%= e.enabled ? '' : ' class="disabled-row"' %>>
+          <td><a href="/edls/<%= e.id %>"><%= e.name %></a><%= e.enabled ? '' : ' (disabled)' %></td>
+          <td><span class="pill"><%= e.type %></span></td>
+          <td><%= e.active_count %></td>
+          <td>
+            <code><%= publicUrl(e.slug) %></code>
+            <button class="btn sm" type="button" onclick="copyText('<%= publicUrl(e.slug) %>', this)">copy</button>
+          </td>
+          <td class="muted"><%= e.last_fetch ? new Date(e.last_fetch).toLocaleString() : 'never' %></td>
+          <td><a href="/edls/<%= e.id %>">manage</a></td>
+        </tr>
+      <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<div class="card">
+  <h2>Create a new EDL</h2>
+  <form method="post" action="/edls">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <div class="row">
+      <label>Name<br><input name="name" required placeholder="block-malicious-ips"></label>
+      <label>Type<br>
+        <select name="type">
+          <option value="ip">IP</option>
+          <option value="domain">Domain</option>
+          <option value="url">URL</option>
+        </select>
+      </label>
+      <label>Description<br><input name="description" placeholder="optional" size="30"></label>
+      <label><br><input type="checkbox" name="random"> random (unguessable) slug</label>
+      <button class="btn primary" type="submit">Create</button>
+    </div>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

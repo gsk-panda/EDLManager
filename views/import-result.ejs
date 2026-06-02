@@ -1,0 +1,20 @@
+<%- include('partials/header') %>
+<div class="card">
+  <h1>Import complete</h1>
+  <p><strong><%= inserted %></strong> entries added,
+     <strong><%= skippedExisting %></strong> already existed,
+     <strong><%= rejected.length %></strong> rejected.</p>
+  <% if (rejected.length) { %>
+    <h2>Rejected lines</h2>
+    <table>
+      <thead><tr><th>Line</th><th>Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <% rejected.forEach(function (r) { %>
+          <tr><td><%= r.line %></td><td class="mono"><%= r.value %></td><td><%= r.error %></td></tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+  <p style="margin-top:14px;"><a class="btn primary" href="/edls/<%= edlId %>">Back to EDL</a></p>
+</div>
+<%- include('partials/footer') %>

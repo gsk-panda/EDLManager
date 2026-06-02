@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: edl
+      POSTGRES_PASSWORD: edlpassword
+      POSTGRES_DB: edl
+    # schema.sql runs automatically the first time the data volume is created
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+      - edl-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U edl -d edl"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      AUTH_MODE: local
+      LOCAL_ADMIN_USER: admin
+      LOCAL_ADMIN_PASSWORD: ChangeMe123!
+      DATABASE_URL: postgres://edl:edlpassword@db:5432/edl
+      SESSION_SECRET: test-only-secret-change-me
+      BASE_URL: http://localhost:3000
+      PORT: "3000"
+      TRUST_PROXY: "0"
+    ports:
+      - "3000:3000"
+
+volumes:
+  edl-pgdata:
