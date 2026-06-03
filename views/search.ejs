@@ -1,0 +1,85 @@
+<%- include('partials/header') %>
+
+<div class="card">
+  <h1>Search Results</h1>
+  
+  <form method="get" action="<%= base %>/search">
+    <div class="row">
+      <label style="flex: 1;">
+        Search across all EDLs<br>
+        <input name="q" value="<%= query %>" placeholder="IP, domain, URL, or comment text..." style="width: 100%; max-width: 600px;" autofocus>
+      </label>
+      <button class="btn primary" type="submit">Search</button>
+    </div>
+  </form>
+
+  <% if (query) { %>
+    <p class="muted" style="margin-top: 16px;">
+      Found <strong><%= totalResults %></strong> result<%= totalResults === 1 ? '' : 's' %> for "<strong><%= query %></strong>"
+      <% if (totalResults >= 500) { %>(showing first 500)<% } %>
+    </p>
+  <% } %>
+</div>
+
+<% if (results.length > 0) { %>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>EDL</th>
+          <th>Type</th>
+          <th>Value</th>
+          <th>Comment</th>
+          <th>Status</th>
+          <th>Expires</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% results.forEach(function(r) { 
+          const isExpired = r.expires_at && new Date(r.expires_at) < now;
+          const isDisabled = !r.enabled || !r.edl_enabled;
+        %>
+        <tr<%= isDisabled ? ' class="disabled-row"' : '' %>>
+          <td>
+            <a href="<%= base %>/edls/<%= r.edl_id %>"><%= r.edl_name %></a>
+            <% if (!r.edl_enabled) { %>
+              <span class="muted">(EDL disabled)</span>
+            <% } %>
+          </td>
+          <td><span class="pill"><%= r.type %></span></td>
+          <td><code><%= r.value %></code></td>
+          <td class="muted"><%= r.comment || '' %></td>
+          <td>
+            <% if (isExpired) { %>
+              <span class="expired">expired</span>
+            <% } else if (!r.enabled) { %>
+              <span class="muted">disabled</span>
+            <% } else { %>
+              <span style="color: var(--ok);">active</span>
+            <% } %>
+          </td>
+          <td class="muted">
+            <% if (r.expires_at) { %>
+              <%= new Date(r.expires_at).toLocaleString() %>
+              <% if (isExpired) { %><br><span class="expired">⚠</span><% } %>
+            <% } else { %>
+              never
+            <% } %>
+          </td>
+          <td>
+            <a href="<%= base %>/edls/<%= r.edl_id %>#entry-<%= r.id %>">view</a>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+<% } else if (query) { %>
+  <div class="card">
+    <p class="muted">No entries found matching "<strong><%= query %></strong>"</p>
+    <p class="muted">Try a different search term or check for typos.</p>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

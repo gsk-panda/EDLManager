@@ -50,6 +50,40 @@ router.get('/', wrap(async (req, res) => {
   res.render('edls', { edls: rows, publicUrl });
 }));
 
+// --- Global Search -----------------------------------------------------------
+router.get('/search', wrap(async (req, res) => {
+  const query = (req.query.q || '').trim();
+  
+  if (!query) {
+    return res.render('search', { query: '', results: [], totalResults: 0 });
+  }
+
+  // Search across all entries - support partial matching with wildcards
+  const searchPattern = `%${query}%`;
+  const { rows } = await db.query(
+    `SELECT 
+       en.id, en.value, en.comment, en.enabled, en.expires_at, en.created_at,
+       e.id as edl_id, e.name as edl_name, e.slug, e.type, e.enabled as edl_enabled
+     FROM edl_entries en
+     JOIN edls e ON e.id = en.edl_id
+     WHERE en.value ILIKE $1 OR en.comment ILIKE $1
+     ORDER BY 
+       en.enabled DESC,
+       e.name,
+       en.value
+     LIMIT 500`,
+    [searchPattern]
+  );
+
+  res.render('search', { 
+    query, 
+    results: rows, 
+    totalResults: rows.length,
+    publicUrl,
+    now: new Date()
+  });
+}));
+
 // --- Create EDL --------------------------------------------------------------
 router.post('/edls', wrap(async (req, res) => {
   const { name, type, description, random } = req.body;

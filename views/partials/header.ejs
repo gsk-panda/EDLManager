@@ -8,13 +8,18 @@
     :root { --fg:#1a1d21; --muted:#6b7280; --line:#e5e7eb; --bg:#f7f8fa;
             --accent:#2563eb; --danger:#dc2626; --ok:#059669; --card:#fff; }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
            color:var(--fg); background:var(--bg); }
+    tr:target { background: #fef3c7; animation: highlight 2s ease; }
+    @keyframes highlight { from { background: #fef3c7; } to { background: transparent; } }
     a { color:var(--accent); text-decoration:none; }
     a:hover { text-decoration:underline; }
     header.top { display:flex; align-items:center; justify-content:space-between;
-                 padding:12px 24px; background:var(--card); border-bottom:1px solid var(--line); }
+                 padding:12px 24px; background:var(--card); border-bottom:1px solid var(--line); gap:20px; }
     header.top .brand { font-weight:700; letter-spacing:.2px; }
+    header.top .search-form { flex:1; max-width:400px; }
+    header.top .search-form input { width:100%; font-size:14px; padding:6px 10px; }
     header.top .right { display:flex; align-items:center; gap:14px; color:var(--muted); font-size:13px; }
     main { max-width:1040px; margin:0 auto; padding:24px; }
     .card { background:var(--card); border:1px solid var(--line); border-radius:10px;
@@ -45,6 +50,11 @@
 <body>
   <header class="top">
     <div class="brand"><a href="<%= base %>/">EDL&nbsp;Manager</a></div>
+    <% if (typeof user !== 'undefined' && user) { %>
+      <form class="search-form" method="get" action="<%= base %>/search">
+        <input type="search" name="q" placeholder="Search all entries..." value="<%= typeof query !== 'undefined' ? query : '' %>">
+      </form>
+    <% } %>
     <div class="right">
       <% if (typeof user !== 'undefined' && user) { %>
         <span><%= user.name || user.email %> &middot; <span class="pill"><%= user.role %></span></span>

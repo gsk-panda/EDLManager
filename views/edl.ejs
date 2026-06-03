@@ -41,7 +41,7 @@
     <thead><tr><th>Value</th><th>Comment</th><th>Expires</th><th>Status</th><th></th></tr></thead>
     <tbody>
     <% entries.forEach(function (e) { %>
-      <tr<%= e.enabled ? '' : ' class="disabled-row"' %>>
+      <tr id="entry-<%= e.id %>"<%= e.enabled ? '' : ' class="disabled-row"' %>>
         <td class="mono"><%= e.value %></td>
         <td><%= e.comment || '' %></td>
         <td class="<%= isExpired(e) ? 'expired' : '' %>">

@@ -193,6 +193,108 @@ if [ -n "$SSL_CERT" ]; then
     fi
 fi
 
+# ==================== Conflict Detection ====================
+echo ""
+log "Checking for conflicts with existing services..."
+echo ""
+
+CONFLICTS_FOUND=0
+
+# Extract the path from BASE_URL (e.g., /edl from https://example.com/edl)
+URL_PATH=$(echo "$BASE_URL" | sed -E 's|^https?://[^/]+||')
+if [ -z "$URL_PATH" ] || [ "$URL_PATH" = "/" ]; then
+    URL_PATH="(root)"
+else
+    info "Will be serving at path: $URL_PATH"
+fi
+
+# Check for existing systemd services (excluding edlmanager itself)
+info "Checking for conflicting systemd services..."
+CONFLICTING_SERVICES=$(systemctl list-units --type=service --state=running --no-pager --no-legend 2>/dev/null | \
+    grep -v edlmanager | awk '{print $1}' | grep -E 'node|web|http|app' || true)
+if [ -n "$CONFLICTING_SERVICES" ]; then
+    warn "Found running web/app services that might conflict:"
+    echo "$CONFLICTING_SERVICES" | sed 's/^/    - /'
+fi
+
+# Check if edlmanager service already exists and is running
+if systemctl is-active edlmanager >/dev/null 2>&1; then
+    warn "edlmanager service is already running!"
+    info "This installation will stop and replace it."
+    ((CONFLICTS_FOUND++))
+fi
+
+# Check for Apache configurations with /edl path
+if [ -d /etc/httpd/conf.d ]; then
+    info "Checking Apache configurations for $URL_PATH..."
+    APACHE_CONFLICTS=$(grep -rl "ProxyPass.*$URL_PATH" /etc/httpd/conf.d 2>/dev/null || true)
+    if [ -n "$APACHE_CONFLICTS" ]; then
+        warn "Found Apache configurations already using $URL_PATH:"
+        echo "$APACHE_CONFLICTS" | sed 's/^/    - /'
+        ((CONFLICTS_FOUND++))
+    fi
+    
+    # Check for Location blocks
+    LOCATION_CONFLICTS=$(grep -rl "<Location.*$URL_PATH" /etc/httpd/conf.d 2>/dev/null || true)
+    if [ -n "$LOCATION_CONFLICTS" ]; then
+        warn "Found Location blocks for $URL_PATH:"
+        echo "$LOCATION_CONFLICTS" | sed 's/^/    - /'
+        ((CONFLICTS_FOUND++))
+    fi
+fi
+
+# Check if port is already in use
+info "Checking if port $PORT is available..."
+if ss -tlnp 2>/dev/null | grep -q ":$PORT "; then
+    PROCESS_ON_PORT=$(ss -tlnp 2>/dev/null | grep ":$PORT " | head -n1)
+    warn "Port $PORT is already in use:"
+    echo "    $PROCESS_ON_PORT"
+    ((CONFLICTS_FOUND++))
+fi
+
+# Check for processes serving the path
+if command -v curl >/dev/null 2>&1; then
+    if curl -sf "http://localhost$URL_PATH" >/dev/null 2>&1 || \
+       curl -sf "https://${SERVER_NAME}${URL_PATH}" >/dev/null 2>&1; then
+        warn "Found existing service responding at $URL_PATH"
+        ((CONFLICTS_FOUND++))
+    fi
+fi
+
+echo ""
+if [ "$CONFLICTS_FOUND" -gt 0 ]; then
+    cat << "WARNING"
+╔═══════════════════════════════════════════════════════════════╗
+║                    ⚠  CONFLICTS DETECTED  ⚠                  ║
+╚═══════════════════════════════════════════════════════════════╝
+WARNING
+    warn "Found $CONFLICTS_FOUND potential conflict(s) that need attention."
+    echo ""
+    warn "Actions that will be taken:"
+    warn "  - Existing edlmanager service will be stopped and replaced"
+    warn "  - Apache configs may need manual cleanup after installation"
+    warn "  - Port conflicts will need manual resolution"
+    echo ""
+    prompt "Do you want to continue despite these conflicts? (yes/no): "
+    read -r CONFLICT_CONFIRM
+    if [[ "$CONFLICT_CONFIRM" != "yes" ]]; then
+        echo ""
+        error "Installation aborted due to conflicts."
+        echo ""
+        info "To resolve conflicts before installing:"
+        info "  1. Stop conflicting services: systemctl stop <service-name>"
+        info "  2. Remove conflicting Apache configs from /etc/httpd/conf.d/"
+        info "  3. Free up port $PORT if it's in use"
+        info "  4. Re-run this installation script"
+        echo ""
+        exit 1
+    fi
+    echo ""
+    info "Continuing installation - conflicts will be handled during cleanup..."
+else
+    info "✓ No conflicts detected. Safe to proceed."
+fi
+
 # ==================== Confirmation Summary ====================
 echo ""
 cat << "DIVIDER"
@@ -237,6 +339,34 @@ read -r CONFIRM
 # ==================== Cleanup Old Installations ====================
 echo ""
 log "Cleaning up old installations..."
+
+# Stop existing edlmanager service if running
+if systemctl is-active edlmanager >/dev/null 2>&1; then
+    info "Stopping existing edlmanager service..."
+    systemctl stop edlmanager
+    info "✓ Stopped edlmanager service"
+fi
+
+if systemctl is-enabled edlmanager >/dev/null 2>&1; then
+    info "Disabling edlmanager service..."
+    systemctl disable edlmanager >/dev/null 2>&1
+    info "✓ Disabled edlmanager service"
+fi
+
+# Remove old Apache configs for this app (but not the whole vhost)
+if [ -d /etc/httpd/conf.d ]; then
+    info "Checking for old EDL Manager Apache configs..."
+    OLD_CONFIGS=$(find /etc/httpd/conf.d -name "edlmanager*" -type f 2>/dev/null || true)
+    if [ -n "$OLD_CONFIGS" ]; then
+        info "Found old Apache configs, backing up..."
+        for CONFIG in $OLD_CONFIGS; do
+            BACKUP="${CONFIG}.backup-$(date +%Y%m%d-%H%M%S)"
+            cp "$CONFIG" "$BACKUP"
+            info "  Backed up: $CONFIG → $BACKUP"
+        done
+        info "Old configs backed up (will be replaced during installation)"
+    fi
+fi
 
 if [ -d "/opt/EDLManager" ]; then
     info "Removing /opt/EDLManager"
