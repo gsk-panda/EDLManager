@@ -56,7 +56,7 @@ BANNER
 log "Step 1: Deployment Directories"
 echo ""
 
-DEPLOY_DIR="/home/SNC/121135-adm/edl-manager"
+DEPLOY_DIR="/opt/edl-manager-deploy"
 prompt "Deployment directory [${DEPLOY_DIR}]: "
 read -r INPUT
 DEPLOY_DIR="${INPUT:-$DEPLOY_DIR}"
@@ -70,12 +70,12 @@ echo ""
 log "Step 2: Network Configuration"
 echo ""
 
-BASE_URL="https://panovision.example.com/edl"
+BASE_URL="https://example.com/edl"
 prompt "Base URL (where the app will be served) [${BASE_URL}]: "
 read -r INPUT
 BASE_URL="${INPUT:-$BASE_URL}"
 
-SERVER_NAME="panovision.example.com"
+SERVER_NAME="example.com"
 prompt "Server hostname [${SERVER_NAME}]: "
 read -r INPUT
 SERVER_NAME="${INPUT:-$SERVER_NAME}"

@@ -32,7 +32,7 @@ The EDL Manager now includes a global search feature that allows you to search a
 - Just type and press Enter to search
 
 #### Dedicated Search Page
-- Access via: `https://your-domain.com/edl/search`
+- Access via: `https://example.com/edl/search`
 - Or use the header search box
 - Shows full search interface with results table
 - Displays result count (up to 500 results)
@@ -151,23 +151,23 @@ Potential improvements for future versions:
 
 ### Copy Files to Server
 
-From your Windows machine:
-```powershell
+From your local machine:
+```bash
 # Copy source files
-scp src/routes/edls.js 121135-adm@paweblog01d:/home/SNC/121135-adm/edl-manager/src/routes/
+scp src/routes/edls.js user@server:/opt/edl-manager-deploy/src/routes/
 
 # Copy view files
-scp views/search.ejs 121135-adm@paweblog01d:/home/SNC/121135-adm/edl-manager/views/
-scp views/partials/header.ejs 121135-adm@paweblog01d:/home/SNC/121135-adm/edl-manager/views/partials/
-scp views/edl.ejs 121135-adm@paweblog01d:/home/SNC/121135-adm/edl-manager/views/
+scp views/search.ejs user@server:/opt/edl-manager-deploy/views/
+scp views/partials/header.ejs user@server:/opt/edl-manager-deploy/views/partials/
+scp views/edl.ejs user@server:/opt/edl-manager-deploy/views/
 ```
 
 ### Install on Server
 
 ```bash
 # Copy to application directory
-sudo cp -r /home/SNC/121135-adm/edl-manager/src/* /opt/EDLManager/src/
-sudo cp -r /home/SNC/121135-adm/edl-manager/views/* /opt/EDLManager/views/
+sudo cp -r /opt/edl-manager-deploy/src/* /opt/EDLManager/src/
+sudo cp -r /opt/edl-manager-deploy/views/* /opt/EDLManager/views/
 
 # Fix permissions
 sudo chown -R edlmgr:edlmgr /opt/EDLManager
@@ -182,7 +182,7 @@ sudo journalctl -u edlmanager -n 20
 
 ### Test
 
-1. Open `https://panovision.sncorp.com/edl`
+1. Open `https://example.com/edl`
 2. Log in
 3. Notice the search box in the header
 4. Type a search term and press Enter

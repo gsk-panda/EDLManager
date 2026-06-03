@@ -61,7 +61,7 @@ section() {
 
 # Configuration
 APP_DIR="${APP_DIR:-/opt/EDLManager}"
-DEPLOY_DIR="${DEPLOY_DIR:-/home/SNC/121135-adm/edl-manager}"
+DEPLOY_DIR="${DEPLOY_DIR:-/opt/edl-manager-deploy}"
 ENV_FILE="${ENV_FILE:-/etc/edlmanager/edlmanager.env}"
 SERVICE_NAME="edlmanager"
 

@@ -73,7 +73,7 @@ The installation proceeds and automatically:
 3. **Removes old installation directories**
    ```bash
    rm -rf /opt/EDLManager
-   rm -rf /home/SNC/121135-adm/edl-manager
+   rm -rf /opt/edl-manager-deploy
    ```
 
 4. **Proceeds with fresh installation**

@@ -17,10 +17,10 @@ The `full-install.sh` script performs a **complete, clean installation** of EDL 
    - Stops and disables existing edlmanager service (if running)
    - Backs up old Apache configurations
    - Removes `/opt/EDLManager` (if exists)
-   - Removes `/home/SNC/121135-adm/edl-manager` (if exists)
+   - Removes `/opt/edl-manager-deploy` (if exists)
 
 3. **Sync Phase**
-   - Syncs the entire project to `/home/SNC/121135-adm/edl-manager`
+   - Syncs the entire project to `/opt/edl-manager-deploy`
    - Excludes unnecessary files (.git, node_modules, .env, etc.)
 
 4. **Installation Phase**
@@ -58,12 +58,12 @@ sudo ./deploy/full-install.sh
 The script will ask you for:
 
 #### Deployment Directories
-- **Deployment directory**: Where to sync the project [`/home/SNC/121135-adm/edl-manager`]
+- **Deployment directory**: Where to sync the project [`/opt/edl-manager-deploy`]
 - **Application directory**: Where to install the app [`/opt/EDLManager`]
 
 #### Network Configuration
-- **Base URL**: Public URL where the app will be served [`https://panovision.example.com/edl`]
-- **Server hostname**: Your server's hostname [`panovision.example.com`]
+- **Base URL**: Public URL where the app will be served [`https://example.com/edl`]
+- **Server hostname**: Your server's hostname [`example.com`]
 - **Port**: Application port [`3010`]
 - **Bind address**: Network interface to bind to [`127.0.0.1`]
 
@@ -110,8 +110,8 @@ sudo ./deploy/full-install.sh
 ```
 
 When prompted:
-- Base URL: `https://panovision.example.com/edl`
-- Server hostname: `panovision.example.com`
+- Base URL: `https://example.com/edl`
+- Server hostname: `example.com`
 - Install PostgreSQL: `n`
 - Database URL: `postgres://edl:SecurePass123@db.example.com:5432/edl`
 - Auth mode: `oidc`
@@ -119,8 +119,8 @@ When prompted:
 - OIDC Client ID: `your-client-id-here`
 - OIDC Client Secret: `your-client-secret-here`
 - Admin emails: `admin@example.com,manager@example.com`
-- SSL cert: `/etc/letsencrypt/live/panovision.example.com/fullchain.pem`
-- SSL key: `/etc/letsencrypt/live/panovision.example.com/privkey.pem`
+- SSL cert: `/etc/letsencrypt/live/example.com/fullchain.pem`
+- SSL key: `/etc/letsencrypt/live/example.com/privkey.pem`
 
 ### Example 3: Non-Interactive (Environment Variables)
 
@@ -253,7 +253,7 @@ After installation, these files contain your configuration:
 | `/etc/systemd/system/edlmanager.service` | systemd service definition |
 | `/etc/httpd/conf.d/edlmanager*.conf` | Apache reverse proxy configuration |
 | `/opt/EDLManager/` | Application files |
-| `/home/SNC/121135-adm/edl-manager/` | Deployment staging area |
+| `/opt/edl-manager-deploy/` | Deployment staging area |
 
 ## Updating the Application
 
@@ -341,7 +341,7 @@ sudo systemctl disable edlmanager
 
 # Remove files
 sudo rm -rf /opt/EDLManager
-sudo rm -rf /home/SNC/121135-adm/edl-manager
+sudo rm -rf /opt/edl-manager-deploy
 sudo rm -rf /etc/edlmanager
 sudo rm /etc/systemd/system/edlmanager.service
 

@@ -1,7 +1,7 @@
 # Deploying on RHEL 9 behind Apache (subpath `/edl`)
 
 This deploys EDL Manager as a hardened systemd service bound to `127.0.0.1`, with
-Apache fronting it at `https://panovision.example.com` so the site **lands on
+Apache fronting it at `https://example.com` so the site **lands on
 `/edl`**. Because other apps share this Apache, the installer configures the web
 front end *safely*: it detects whether the hostname already has a vhost and either
 adds a dedicated one (when it's free) or stages a snippet for you to merge (when
@@ -10,12 +10,12 @@ it's already in use) — it never overwrites an existing vhost.
 ## How the subpath works
 
 The app reads its mount path from `BASE_URL`. With
-`BASE_URL=https://panovision.example.com/edl` it mounts everything under `/edl`
+`BASE_URL=https://example.com/edl` it mounts everything under `/edl`
 (routes, links, redirects, and the session cookie are all scoped to `/edl`), and
 firewall feed URLs become:
 
 ```
-https://panovision.example.com/edl/<slug>.txt
+https://example.com/edl/<slug>.txt
 ```
 
 Apache passes `/edl` through unchanged (no stripping), so the proxy config is just
@@ -45,7 +45,7 @@ The installer:
 8. Configures Apache (see below).
 
 Common overrides (any can be set as env vars): `PORT` (default 3010), `BASE_URL`,
-`SERVER_NAME` (default `panovision.example.com`), `SSL_CERT`/`SSL_KEY`,
+`SERVER_NAME` (default `example.com`), `SSL_CERT`/`SSL_KEY`,
 `AUTH_MODE` (default `local`), `ADMIN_USER`, `BIND_ADDR`.
 
 ## How Apache gets configured
@@ -81,7 +81,7 @@ httpd -M | grep -E 'proxy_module|proxy_http_module|headers_module|ssl_module'
 
 ## Point a firewall at a list
 
-In PAN-OS, set the EDL Source to `https://panovision.example.com/edl/<slug>.txt`
+In PAN-OS, set the EDL Source to `https://example.com/edl/<slug>.txt`
 (the exact URL is shown on each list's page in the UI). No authentication is
 configured on the firewall side.
 
@@ -89,7 +89,7 @@ configured on the firewall side.
 
 Edit `/etc/edlmanager/edlmanager.env`: set `AUTH_MODE=oidc` and fill in the
 `OIDC_*` values (the file has them commented, including the correct redirect URI
-`https://panovision.example.com/edl/callback`). Then:
+`https://example.com/edl/callback`). Then:
 
 ```bash
 systemctl restart edlmanager

@@ -117,9 +117,9 @@ sudo DATABASE_URL='postgres://edl:pass@host:5432/edl' \
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `BASE_URL` | `https://panovision.example.com/edl` | Public URL where app is served |
+| `BASE_URL` | `https://example.com/edl` | Public URL where app is served |
 | `DATABASE_URL` | *(required)* | PostgreSQL connection string |
-| `SERVER_NAME` | `panovision.example.com` | Server hostname |
+| `SERVER_NAME` | `example.com` | Server hostname |
 
 ### Optional Variables
 
@@ -295,7 +295,7 @@ After installation, these directories are created:
 ├── package.json                      # Dependencies
 └── node_modules/                     # Installed packages
 
-/home/SNC/121135-adm/edl-manager/    # Deployment staging
+/opt/edl-manager-deploy/              # Deployment staging
 └── (mirror of repository)
 
 /etc/edlmanager/                      # Configuration
@@ -434,7 +434,7 @@ sudo ./deploy/full-install.sh
 2. Prompts for configuration (or uses env vars)
 3. Shows summary and asks for confirmation
 4. Deletes `/opt/EDLManager`
-5. Deletes `/home/SNC/121135-adm/edl-manager`
+5. Deletes `/opt/edl-manager-deploy`
 6. Syncs project files to deployment directory
 7. Runs `install-rhel.sh` with your settings
 
