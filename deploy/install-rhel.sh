@@ -13,7 +13,7 @@
 #   sudo ./deploy/install-rhel.sh --with-postgres       # also stand up a local PostgreSQL
 #
 # Override any default with an environment variable, e.g.:
-#   sudo PORT=3020 BASE_URL=https://panovision.sncorp.com/edl ./deploy/install-rhel.sh
+#   sudo PORT=3020 BASE_URL=https://panovision.example.com/edl ./deploy/install-rhel.sh
 #
 set -euo pipefail
 
@@ -24,14 +24,14 @@ ENV_DIR="${ENV_DIR:-/etc/edlmanager}"
 ENV_FILE="$ENV_DIR/edlmanager.env"
 NODE_MAJOR="${NODE_MAJOR:-20}"
 
-BASE_URL="${BASE_URL:-https://panovision.sncorp.com/edl}"
+BASE_URL="${BASE_URL:-https://panovision.example.com/edl}"
 PORT="${PORT:-3010}"
 BIND_ADDR="${BIND_ADDR:-127.0.0.1}"
 
 # Apache front end. SERVER_NAME is the public hostname; SSL_CERT/SSL_KEY are only
 # needed when the installer has to create a brand-new dedicated vhost (i.e. the
 # hostname isn't already configured). Let's Encrypt paths are auto-detected.
-SERVER_NAME="${SERVER_NAME:-panovision.sncorp.com}"
+SERVER_NAME="${SERVER_NAME:-panovision.example.com}"
 SSL_CERT="${SSL_CERT:-}"
 SSL_KEY="${SSL_KEY:-}"
 
