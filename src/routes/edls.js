@@ -24,7 +24,9 @@ function randomSlug() {
 }
 
 function publicUrl(slug) {
-  return `${config.baseUrl.replace(/\/$/, '')}/edl/${slug}.txt`;
+  // baseUrl already includes any subpath (e.g. https://host/edl), so the feed
+  // is served at <baseUrl>/<slug>.txt.
+  return `${config.baseUrl}/${slug}.txt`;
 }
 
 // nullable timestamp from a datetime-local input
@@ -65,7 +67,7 @@ router.post('/edls', wrap(async (req, res) => {
       action: 'create_edl', entityType: 'edl', entityId: rows[0].id,
       edlId: rows[0].id, detail: { after: { name, type, slug } },
     });
-    res.redirect(`/edls/${rows[0].id}`);
+    res.redirect(config.path(`/edls/${rows[0].id}`));
   } catch (err) {
     if (err.code === '23505') return res.status(409).send('Slug already exists; pick a different name or use a random slug.');
     throw err;
@@ -102,7 +104,7 @@ router.post('/edls/:id', wrap(async (req, res) => {
     action: 'update_edl', entityType: 'edl', entityId: req.params.id, edlId: req.params.id,
     detail: { before, after: { name, description, enabled: enabled === 'on' } },
   });
-  res.redirect(`/edls/${req.params.id}`);
+  res.redirect(config.path(`/edls/${req.params.id}`));
 }));
 
 // --- Delete EDL --------------------------------------------------------------
@@ -113,7 +115,7 @@ router.post('/edls/:id/delete', wrap(async (req, res) => {
     action: 'delete_edl', entityType: 'edl', entityId: req.params.id, edlId: req.params.id,
     detail: { before },
   });
-  res.redirect('/');
+  res.redirect(config.path('/'));
 }));
 
 // --- Add a single entry ------------------------------------------------------
@@ -139,7 +141,7 @@ router.post('/edls/:id/entries', wrap(async (req, res) => {
     if (err.code === '23505') return res.status(409).send('That value already exists in this EDL.');
     throw err;
   }
-  res.redirect(`/edls/${edl.id}`);
+  res.redirect(config.path(`/edls/${edl.id}`));
 }));
 
 // --- Edit an entry -----------------------------------------------------------
@@ -163,7 +165,7 @@ router.post('/entries/:id', wrap(async (req, res) => {
     action: 'edit_entry', entityType: 'entry', entityId: entry.id, edlId: entry.edl_id,
     detail: { before, after: { value: result.value, comment: req.body.comment || null, expires_at: expires } },
   });
-  res.redirect(`/edls/${entry.edl_id}`);
+  res.redirect(config.path(`/edls/${entry.edl_id}`));
 }));
 
 // --- Toggle enabled ----------------------------------------------------------
@@ -175,7 +177,7 @@ router.post('/entries/:id/toggle', wrap(async (req, res) => {
     action: 'toggle_entry', entityType: 'entry', entityId: entry.id, edlId: entry.edl_id,
     detail: { value: entry.value, enabled: !entry.enabled },
   });
-  res.redirect(`/edls/${entry.edl_id}`);
+  res.redirect(config.path(`/edls/${entry.edl_id}`));
 }));
 
 // --- Delete an entry ---------------------------------------------------------
@@ -187,7 +189,7 @@ router.post('/entries/:id/delete', wrap(async (req, res) => {
     action: 'delete_entry', entityType: 'entry', entityId: entry.id, edlId: entry.edl_id,
     detail: { before: { value: entry.value } },
   });
-  res.redirect(`/edls/${entry.edl_id}`);
+  res.redirect(config.path(`/edls/${entry.edl_id}`));
 }));
 
 // --- Bulk import -------------------------------------------------------------

@@ -7,7 +7,7 @@
 
   <% if (authMode === 'local') { %>
     <p class="muted" style="text-align:center;">Local test login.</p>
-    <form method="post" action="/login">
+    <form method="post" action="<%= base %>/login">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
       <p><label>Username<br><input name="username" required autofocus style="width:100%"></label></p>
       <p><label>Password<br><input name="password" type="password" required style="width:100%"></label></p>
@@ -15,7 +15,7 @@
     </form>
   <% } else { %>
     <p class="muted" style="text-align:center;">Sign in to manage External Dynamic Lists.</p>
-    <p style="text-align:center;"><a class="btn primary" href="/login/start">Sign in with SSO</a></p>
+    <p style="text-align:center;"><a class="btn primary" href="<%= base %>/login/start">Sign in with SSO</a></p>
   <% } %>
 </div>
 <%- include('partials/footer') %>

@@ -7,18 +7,18 @@
 %>
 
 <div class="card">
-  <p class="muted"><a href="/">&larr; All EDLs</a></p>
+  <p class="muted"><a href="<%= base %>/">&larr; All EDLs</a></p>
   <h1><%= edl.name %> <span class="pill"><%= edl.type %></span></h1>
   <p>
     <code><%= url %></code>
     <button class="btn sm" type="button" onclick="copyText('<%= url %>', this)">copy</button>
     &nbsp; <a class="btn sm" href="<%= url %>" target="_blank">view raw</a>
-    &nbsp; <a class="btn sm" href="/edls/<%= edl.id %>/export">download</a>
+    &nbsp; <a class="btn sm" href="<%= base %>/edls/<%= edl.id %>/export">download</a>
   </p>
 
   <details>
     <summary class="muted">Edit list settings</summary>
-    <form method="post" action="/edls/<%= edl.id %>" style="margin-top:10px;">
+    <form method="post" action="<%= base %>/edls/<%= edl.id %>" style="margin-top:10px;">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
       <div class="row">
         <label>Name<br><input name="name" value="<%= edl.name %>"></label>
@@ -27,7 +27,7 @@
         <button class="btn primary" type="submit">Save</button>
       </div>
     </form>
-    <form method="post" action="/edls/<%= edl.id %>/delete" style="margin-top:8px;"
+    <form method="post" action="<%= base %>/edls/<%= edl.id %>/delete" style="margin-top:8px;"
           onsubmit="return confirm('Delete this EDL and all its entries?');">
       <input type="hidden" name="_csrf" value="<%= csrf %>">
       <button class="btn danger sm" type="submit">Delete EDL</button>
@@ -50,18 +50,18 @@
         </td>
         <td><%= e.enabled ? (isExpired(e) ? 'hidden (expired)' : 'served') : 'disabled' %></td>
         <td>
-          <form class="inline" method="post" action="/entries/<%= e.id %>/toggle">
+          <form class="inline" method="post" action="<%= base %>/entries/<%= e.id %>/toggle">
             <input type="hidden" name="_csrf" value="<%= csrf %>">
             <button class="btn sm" type="submit"><%= e.enabled ? 'disable' : 'enable' %></button>
           </form>
-          <form class="inline" method="post" action="/entries/<%= e.id %>/delete"
+          <form class="inline" method="post" action="<%= base %>/entries/<%= e.id %>/delete"
                 onsubmit="return confirm('Delete this entry?');">
             <input type="hidden" name="_csrf" value="<%= csrf %>">
             <button class="btn danger sm" type="submit">delete</button>
           </form>
           <details style="display:inline-block;">
             <summary class="btn sm" style="list-style:none;">edit</summary>
-            <form method="post" action="/entries/<%= e.id %>" style="margin-top:6px;">
+            <form method="post" action="<%= base %>/entries/<%= e.id %>" style="margin-top:6px;">
               <input type="hidden" name="_csrf" value="<%= csrf %>">
               <div class="row">
                 <label>Value<br><input class="mono" name="value" value="<%= e.value %>"></label>
@@ -80,7 +80,7 @@
 
 <div class="card">
   <h2>Add entry</h2>
-  <form method="post" action="/edls/<%= edl.id %>/entries">
+  <form method="post" action="<%= base %>/edls/<%= edl.id %>/entries">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <div class="row">
       <label>Value<br><input class="mono" name="value" required placeholder="<%= edl.type === 'ip' ? '203.0.113.0/24' : (edl.type === 'domain' ? '*.example.com' : 'example.com/path') %>"></label>
@@ -94,7 +94,7 @@
 <div class="card">
   <h2>Bulk import</h2>
   <p class="muted">One entry per line. Blank lines and <code>#</code> comments are ignored; an inline <code># comment</code> is attached to the entry. Invalid and duplicate lines are reported, not silently dropped.</p>
-  <form method="post" action="/edls/<%= edl.id %>/import">
+  <form method="post" action="<%= base %>/edls/<%= edl.id %>/import">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <textarea name="bulk" rows="8" placeholder="203.0.113.5 # known scanner&#10;198.51.100.0/24"></textarea>
     <p><button class="btn primary" type="submit">Import</button></p>

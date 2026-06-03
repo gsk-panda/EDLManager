@@ -8,7 +8,7 @@ a public `.txt` URL that a firewall fetches anonymously over HTTPS.
 
 - **Management plane** — humans, authenticated via OIDC, doing CRUD. Sessions,
   CSRF, audit logging.
-- **Serving plane** — `GET /edl/<slug>.txt`, public and unauthenticated, returning
+- **Serving plane** — `GET <BASE_URL>/<slug>.txt`, public and unauthenticated, returning
   `text/plain`. Mounted before sessions/auth so the firewall fetch path stays
   stateless. A disabled or missing EDL returns **404, never 200 + empty body**
   (an empty 200 would clear the list on the firewall).

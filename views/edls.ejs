@@ -12,7 +12,7 @@
       <tbody>
       <% edls.forEach(function (e) { %>
         <tr<%= e.enabled ? '' : ' class="disabled-row"' %>>
-          <td><a href="/edls/<%= e.id %>"><%= e.name %></a><%= e.enabled ? '' : ' (disabled)' %></td>
+          <td><a href="<%= base %>/edls/<%= e.id %>"><%= e.name %></a><%= e.enabled ? '' : ' (disabled)' %></td>
           <td><span class="pill"><%= e.type %></span></td>
           <td><%= e.active_count %></td>
           <td>
@@ -20,7 +20,7 @@
             <button class="btn sm" type="button" onclick="copyText('<%= publicUrl(e.slug) %>', this)">copy</button>
           </td>
           <td class="muted"><%= e.last_fetch ? new Date(e.last_fetch).toLocaleString() : 'never' %></td>
-          <td><a href="/edls/<%= e.id %>">manage</a></td>
+          <td><a href="<%= base %>/edls/<%= e.id %>">manage</a></td>
         </tr>
       <% }); %>
       </tbody>
@@ -30,7 +30,7 @@
 
 <div class="card">
   <h2>Create a new EDL</h2>
-  <form method="post" action="/edls">
+  <form method="post" action="<%= base %>/edls">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <div class="row">
       <label>Name<br><input name="name" required placeholder="block-malicious-ips"></label>

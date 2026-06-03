@@ -15,17 +15,20 @@ async function createApp() {
 
   const app = express();
   if (config.trustProxy) app.set('trust proxy', 1);
-
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, '..', 'views'));
 
-  // Public, unauthenticated EDL feed -- mounted BEFORE session/auth so the
-  // firewall fetch path stays dead simple and stateless.
-  app.use('/edl', serveRouter);
+  // Everything is attached to `root`, then mounted at the base path so the app
+  // can live at the URL root or under a subdirectory (e.g. /edl) transparently.
+  const root = express.Router();
+
+  // Public, unauthenticated EDL feed: /<slug>.txt (i.e. <base>/<slug>.txt).
+  // Mounted BEFORE session/auth so the firewall fetch path stays stateless.
+  root.use('/', serveRouter);
 
   // ---- Management plane ----
-  app.use(express.urlencoded({ extended: false }));
-  app.use(session({
+  root.use(express.urlencoded({ extended: false }));
+  root.use(session({
     store: new PgSession({ pool: db.pool, tableName: 'session' }),
     secret: config.sessionSecret,
     resave: false,
@@ -33,46 +36,39 @@ async function createApp() {
     cookie: {
       httpOnly: true,
       sameSite: 'lax',
-      secure: config.trustProxy, // requires HTTPS at the proxy in prod
+      secure: config.trustProxy,           // HTTPS at the proxy in prod
+      path: config.path(),                 // scope cookie to the app's subpath
       maxAge: 1000 * 60 * 60 * 8,
     },
   }));
-  app.use(auth.attachUser);
-  app.use(auth.csrf); // issues a token to every page; validates every POST
+  root.use(auth.attachUser);
+  root.use(auth.csrf);
 
-  // Auth routes
-  app.get('/login', (req, res) => res.render('login', { error: null }));
-  app.post('/login', auth.localLogin);      // local mode
-  app.get('/login/start', auth.login);       // oidc mode
-  app.get('/callback', auth.callback);       // oidc mode
-  app.post('/logout', auth.requireAuth, auth.logout);
+  root.get('/login', (req, res) => res.render('login', { error: null }));
+  root.post('/login', auth.localLogin);
+  root.get('/login/start', auth.login);
+  root.get('/callback', auth.callback);
+  root.post('/logout', auth.requireAuth, auth.logout);
 
-  // Protected management routes
-  app.use(auth.requireAuth, edlsRouter);
+  root.use(auth.requireAuth, edlsRouter);
 
-  // 404 + error handlers
-  app.use((req, res) => res.status(404).send('Not found'));
+  root.use((req, res) => res.status(404).send('Not found'));
   // eslint-disable-next-line no-unused-vars
-  app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).send('Internal server error');
-  });
+  root.use((err, req, res, next) => { console.error(err); res.status(500).send('Internal server error'); });
 
+  app.use(config.path(), root); // mount at "/" or "/edl"
   return app;
 }
 
 async function main() {
   const app = await createApp();
-  app.listen(config.port, () => {
-    console.log(`EDL Manager listening on ${config.baseUrl} (port ${config.port}) [auth: ${config.authMode}]`);
+  app.listen(config.port, config.bindAddr, () => {
+    console.log(`EDL Manager on ${config.baseUrl} (bind ${config.bindAddr}:${config.port}, base "${config.basePath || '/'}", auth ${config.authMode})`);
   });
 }
 
 if (require.main === module) {
-  main().catch((err) => {
-    console.error('Fatal startup error:', err);
-    process.exit(1);
-  });
+  main().catch((err) => { console.error('Fatal startup error:', err); process.exit(1); });
 }
 
 module.exports = { createApp };
