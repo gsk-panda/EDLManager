@@ -1,10 +1,11 @@
 # Deploying on RHEL 9 behind Apache (subpath `/edl`)
 
 This deploys EDL Manager as a hardened systemd service bound to `127.0.0.1`, with
-Apache reverse-proxying `https://panovision.sncorp.com/edl` to it. It is designed
-for a server that **already runs other apps on the same Apache**, so it never adds
-a virtual host and never edits Apache automatically — you merge one small snippet
-into your existing vhost.
+Apache fronting it at `https://panovision.sncorp.com` so the site **lands on
+`/edl`**. Because other apps share this Apache, the installer configures the web
+front end *safely*: it detects whether the hostname already has a vhost and either
+adds a dedicated one (when it's free) or stages a snippet for you to merge (when
+it's already in use) — it never overwrites an existing vhost.
 
 ## How the subpath works
 
@@ -41,33 +42,41 @@ The installer:
    `SESSION_SECRET` and, in local-auth mode, a generated admin password (printed once).
 6. Installs and starts the `edlmanager` systemd service (loopback-only).
 7. Sets the SELinux boolean `httpd_can_network_connect`.
-8. Stages the Apache snippet at `/etc/httpd/conf.d/edlmanager.conf.example` — **not active**.
+8. Configures Apache (see below).
 
 Common overrides (any can be set as env vars): `PORT` (default 3010), `BASE_URL`,
+`SERVER_NAME` (default `panovision.sncorp.com`), `SSL_CERT`/`SSL_KEY`,
 `AUTH_MODE` (default `local`), `ADMIN_USER`, `BIND_ADDR`.
 
-## Wire up Apache (manual, by design)
+## How Apache gets configured
 
-1. Open the existing `<VirtualHost *:443>` that serves `panovision.sncorp.com`.
-2. Paste the four directives from `/etc/httpd/conf.d/edlmanager.conf.example`
-   into it (next to the other apps' proxy lines):
+The installer checks whether `SERVER_NAME` already has a vhost
+(`grep ServerName` across `/etc/httpd/conf*`), then takes one of two paths:
 
-   ```apache
-   ProxyPreserveHost On
-   RequestHeader set X-Forwarded-Proto "https"
-   ProxyPass        /edl  http://127.0.0.1:3010/edl  retry=0
-   ProxyPassReverse /edl  http://127.0.0.1:3010/edl
-   ```
-3. Test and reload (never reload without testing on a shared server):
+- **Hostname is free** → it writes a dedicated vhost
+  (`/etc/httpd/conf.d/edlmanager-vhost.conf`) that redirects HTTP→HTTPS, proxies
+  `/edl`, and redirects the bare root `/` to `/edl/` (making it the main site).
+  It needs a TLS cert: Let's Encrypt at
+  `/etc/letsencrypt/live/<host>/` is auto-detected, otherwise pass
+  `SSL_CERT=/path/fullchain.pem SSL_KEY=/path/privkey.pem`. It runs
+  `apachectl configtest` and only reloads httpd if the test passes; on failure it
+  backs the file out so the running config is never broken. If no cert is found,
+  the vhost is written as `.example` with placeholder paths for you to finish.
 
-   ```bash
-   apachectl configtest && systemctl reload httpd
-   ```
+- **Hostname already has a vhost** (your other apps) → it does **not** touch it.
+  It stages `/etc/httpd/conf.d/edlmanager.conf.example`; merge those directives
+  into your existing `<VirtualHost *:443>`. To make `/edl` the landing page,
+  uncomment the `RedirectMatch 302 ^/$ /edl/` line (it only affects the bare root;
+  other apps' sub-paths keep working). Then:
 
-Confirm the required modules are present (default on RHEL):
+  ```bash
+  apachectl configtest && systemctl reload httpd
+  ```
+
+Either way, confirm the required modules are present (default on RHEL):
 
 ```bash
-httpd -M | grep -E 'proxy_module|proxy_http_module|headers_module'
+httpd -M | grep -E 'proxy_module|proxy_http_module|headers_module|ssl_module'
 ```
 
 ## Point a firewall at a list
